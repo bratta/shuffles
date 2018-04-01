@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require 'bundler/setup'
+require 'shuffles'
+require 'shuffles/config'
+require 'optparse'
+
+options = {
+  configfile: "~/.shuffles.yml"
+}
+
+OptionParser.new do |parser|
+  parser.banner = "Usage: shuffles [options]"
+
+  parser.on("-c", "--config CONFIGFILE", String, "Location of the shuffles.yml config file; defaults to ~/.shuffles.yml") do |configfile|
+    options[:configfile] = configfile
+  end
+  parser.on("-p", "--playlist PLAYLIST", String, "Spotify playlist URI, defaults to playlist_uri setting in config") do |playlist|
+    options[:playlist] = playlist
+  end
+  parser.on_tail("-h", "--help", "Show this help message") do
+    puts parser
+    exit
+  end
+  parser.on_tail("-v", "--version", "Show the version") do
+    puts Shuffles::VERSION
+    exit
+  end
+end.parse!
+
+config = Shuffles::Config.new(options[:configfile])
+if options[:playlist]
+  config.data.set "spotify.playlist_uri", options[:playlist]
+end
+if !config.data.spotify.playlist_uri
+  puts "Please specify a Spotify URI for your playlist via the -p flag or in the config file."
+  puts "See the shuffles.yml.example for an example."
+  puts "To get the playlist URI, right-click the playlist title in Spotify and choose"
+  puts "\"Copy Spotify URI\" from the context menu."
+  exit
+end
+
+optimizer = Shuffles::Optimizer.new(config)
+optimizer.optimize

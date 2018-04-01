@@ -1,0 +1,8 @@
+# Get your credentials here: https://developer.spotify.com/my-applications
+spotify:
+  client_id: "<your client id>"
+  client_secret: "<your client secret>"
+  playlist_uri: "<spotify playlist uri>"
+cache:
+  use_tempdir: true # Uses the system temp directory, this is the default
+  directory: "/path/to/some/dir" # If you set use_tempdir to false
